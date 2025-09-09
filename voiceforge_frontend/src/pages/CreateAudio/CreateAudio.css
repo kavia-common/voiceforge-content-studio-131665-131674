@@ -233,8 +233,25 @@
 .generate-step {
   background: var(--bg-primary);
   border-radius: 12px;
-  padding: 2rem;
+  overflow: hidden;
   box-shadow: 0 4px 20px var(--shadow-color);
+}
+
+.generate-step .step-header {
+  padding: 2rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.generate-step .generation-summary {
+  padding: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.generate-step .step-actions {
+  padding: 2rem;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
 }
 
 .generation-summary {

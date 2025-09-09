@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import ScriptUpload from '../../components/ScriptUpload/ScriptUpload';
 import { VoiceSelection } from '../../components/VoiceSelection';
+import AudioControls from '../../components/AudioControls';
+import AudioGeneration from '../../components/AudioGeneration';
 import './CreateAudio.css';
 
 // PUBLIC_INTERFACE
@@ -12,11 +14,20 @@ const CreateAudio = () => {
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [currentStep, setCurrentStep] = useState('script'); // 'script', 'voice', 'generate'
   const [audioSettings, setAudioSettings] = useState({
-    speed: 1,
-    pitch: 1,
-    volume: 1,
-    addPauses: true,
-    backgroundMusic: null
+    speed: 1.0,
+    pitch: 1.0,
+    volume: 1.0,
+    emotion: 'neutral',
+    emotionIntensity: 0.5,
+    pace: 'normal',
+    backgroundMusic: null,
+    musicVolume: 0.3,
+    voiceEffects: {
+      addPauses: true,
+      breathingSounds: false,
+      emphasis: false,
+      whisper: false
+    }
   });
 
   const handleScriptChange = (scriptText) => {
@@ -39,14 +50,22 @@ const CreateAudio = () => {
     }
   };
 
+  const handleAudioSettingsChange = (newSettings) => {
+    setAudioSettings(newSettings);
+  };
+
+  const handlePreviewGeneration = (previewData) => {
+    console.log('Preview generated:', previewData);
+  };
+
+  const handleGenerationComplete = (generation) => {
+    console.log('Generation completed:', generation);
+    alert(`Audio generation completed! File: ${generation.id}`);
+  };
+
   const handleGenerateAudio = () => {
-    // TODO: Integrate with backend API for audio generation
-    console.log('Generating audio with:', {
-      script: currentScript,
-      voice: selectedVoice,
-      settings: audioSettings
-    });
-    alert('Audio generation started! (This would integrate with the backend API)');
+    // This will be handled by the AudioGeneration component
+    setCurrentStep('generate');
   };
 
   const steps = [
@@ -148,7 +167,7 @@ const CreateAudio = () => {
           <div className="generate-step">
             <div className="step-header">
               <h2>Generate Audio</h2>
-              <p>Review your settings and generate your audio content</p>
+              <p>Fine-tune your audio settings and generate professional content</p>
             </div>
             
             <div className="generation-summary">
@@ -180,59 +199,24 @@ const CreateAudio = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="summary-section">
-                <h3>Audio Settings</h3>
-                <div className="audio-controls">
-                  <div className="control-group">
-                    <label>Speed</label>
-                    <input 
-                      type="range" 
-                      min="0.5" 
-                      max="2" 
-                      step="0.1"
-                      value={audioSettings.speed}
-                      onChange={(e) => setAudioSettings(prev => ({...prev, speed: parseFloat(e.target.value)}))}
-                    />
-                    <span>{audioSettings.speed}x</span>
-                  </div>
-                  <div className="control-group">
-                    <label>Pitch</label>
-                    <input 
-                      type="range" 
-                      min="0.5" 
-                      max="2" 
-                      step="0.1"
-                      value={audioSettings.pitch}
-                      onChange={(e) => setAudioSettings(prev => ({...prev, pitch: parseFloat(e.target.value)}))}
-                    />
-                    <span>{audioSettings.pitch}x</span>
-                  </div>
-                  <div className="control-group">
-                    <label>Volume</label>
-                    <input 
-                      type="range" 
-                      min="0.1" 
-                      max="1" 
-                      step="0.1"
-                      value={audioSettings.volume}
-                      onChange={(e) => setAudioSettings(prev => ({...prev, volume: parseFloat(e.target.value)}))}
-                    />
-                    <span>{Math.round(audioSettings.volume * 100)}%</span>
-                  </div>
-                  <div className="control-group checkbox">
-                    <label>
-                      <input 
-                        type="checkbox"
-                        checked={audioSettings.addPauses}
-                        onChange={(e) => setAudioSettings(prev => ({...prev, addPauses: e.target.checked}))}
-                      />
-                      Add natural pauses
-                    </label>
-                  </div>
-                </div>
-              </div>
             </div>
+
+            {/* Advanced Audio Controls */}
+            <AudioControls
+              onSettingsChange={handleAudioSettingsChange}
+              initialSettings={audioSettings}
+              selectedVoice={selectedVoice}
+              scriptText={currentScript}
+              onPreview={handlePreviewGeneration}
+            />
+
+            {/* Audio Generation Component */}
+            <AudioGeneration
+              onGenerationComplete={handleGenerationComplete}
+              selectedVoice={selectedVoice}
+              audioSettings={audioSettings}
+              scriptText={currentScript}
+            />
 
             <div className="step-actions">
               <div className="action-buttons">
@@ -241,12 +225,6 @@ const CreateAudio = () => {
                   onClick={handlePreviousStep}
                 >
                   ← Back to Voice Selection
-                </button>
-                <button 
-                  className="btn-primary generate-btn"
-                  onClick={handleGenerateAudio}
-                >
-                  🎙️ Generate Audio
                 </button>
               </div>
             </div>
