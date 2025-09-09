@@ -11,6 +11,7 @@ import Analytics from './pages/Analytics/Analytics';
 import Subscription from './pages/Subscription/Subscription';
 import Settings from './pages/Settings/Settings';
 import './App.css';
+import './responsive.css';
 
 // PUBLIC_INTERFACE
 /**

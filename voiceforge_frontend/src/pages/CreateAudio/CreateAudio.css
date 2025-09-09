@@ -407,27 +407,163 @@
   box-shadow: 0 6px 20px rgba(52, 211, 153, 0.4);
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
+/* Enhanced responsive design with mobile-first approach */
+@media (max-width: 480px) {
+  .create-audio {
+    padding: 0.75rem;
+  }
+  
+  .create-audio-header {
+    margin-bottom: 2rem;
+  }
+  
+  .create-audio-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .create-audio-header p {
+    font-size: 0.95rem;
+    padding: 0 0.5rem;
+  }
+
   .progress-steps {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .step {
+    flex-direction: row;
     gap: 1rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    justify-content: flex-start;
   }
 
   .step:not(:last-child)::after {
-    width: 1rem;
-    left: calc(100% + 0.5rem);
+    display: none;
+  }
+  
+  .step-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .step-label {
+    font-size: 0.875rem;
+    text-align: left;
   }
 
-  .generation-summary {
-    grid-template-columns: 1fr;
+  .step-actions {
+    padding: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .step-header {
+    padding: 1.5rem 1rem;
+  }
+  
+  .step-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .step-header p {
+    font-size: 0.9rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .btn-primary,
+  .btn-secondary,
+  .btn-accent {
+    justify-content: center;
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+
+  .script-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .script-stats span {
+    text-align: center;
+    padding: 0.75rem;
+  }
+
+  .voice-summary {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .voice-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 1.75rem;
+    align-self: center;
   }
 
   .audio-controls {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .control-group {
+    gap: 0.75rem;
+  }
+  
+  .control-group label {
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  
+  .control-group input[type="range"] {
+    height: 8px;
+  }
+  
+  .control-group input[type="range"]::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .control-group span {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    min-width: 70px;
+  }
+  
+  .generate-btn {
+    font-size: 1rem;
+    padding: 1rem 2rem;
+    width: 100%;
+  }
+  
+  .generation-summary {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .summary-card {
+    padding: 1rem;
+  }
+  
+  .summary-details {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 481px) and (max-width: 768px) {
   .create-audio {
     padding: 1rem;
   }
@@ -441,14 +577,16 @@
   }
 
   .progress-steps {
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 1rem;
+    margin-top: 2rem;
   }
 
   .step {
-    flex-direction: row;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 120px;
   }
 
   .step:not(:last-child)::after {
@@ -460,29 +598,239 @@
   }
   
   .action-buttons {
-    flex-direction: column;
-    justify-content: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
   
   .btn-primary,
   .btn-secondary,
   .btn-accent {
+    flex: 1;
+    min-width: 140px;
     justify-content: center;
-    width: 100%;
   }
 
   .script-stats {
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .voice-summary {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: row;
+    gap: 1rem;
   }
 
-  .control-group span {
-    text-align: left;
+  .audio-controls {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .generation-summary {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .progress-steps {
+    gap: 1.5rem;
+  }
+
+  .step:not(:last-child)::after {
+    width: 1.5rem;
+    left: calc(100% + 0.75rem);
+  }
+
+  .generation-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .audio-controls {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .action-buttons {
+    justify-content: center;
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .progress-steps {
+    gap: 2.5rem;
+  }
+
+  .step:not(:last-child)::after {
+    width: 2.5rem;
+    left: calc(100% + 1.25rem);
+  }
+  
+  .step:hover {
+    transform: translateY(-2px);
+  }
+  
+  .step:hover .step-icon {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-accent:hover,
+  .generate-btn:hover {
+    transform: none;
+  }
+  
+  .step:hover {
+    transform: none;
+  }
+  
+  .step:hover .step-icon {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .control-group input[type="range"] {
+    height: 12px;
+  }
+  
+  .control-group input[type="range"]::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .control-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* Landscape orientation adjustments for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .create-audio-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .create-audio-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .progress-steps {
+    flex-direction: row;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .step {
+    flex-direction: column;
+    min-width: 80px;
+  }
+  
+  .step-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .step-icon {
+    border-width: 1px;
+  }
+  
+  .summary-card {
+    border-width: 0.5px;
+  }
+}
+
+/* Focus improvements for keyboard navigation */
+.btn-primary:focus,
+.btn-secondary:focus,
+.btn-accent:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.control-group input[type="range"]:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+.control-group input[type="checkbox"]:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Loading states for mobile */
+.step-actions.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.step-actions.loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.1), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  to {
+    left: 100%;
+  }
+}
+
+/* Improved animation performance */
+.create-audio-content > * {
+  animation: slideInOptimized 0.3s ease-out;
+  will-change: transform, opacity;
+}
+
+@keyframes slideInOptimized {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Print styles */
+@media print {
+  .create-audio {
+    padding: 0;
+  }
+  
+  .progress-steps,
+  .action-buttons {
+    display: none;
+  }
+  
+  .step-actions,
+  .generation-summary {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .create-audio-header h1 {
+    color: #000;
   }
 }
 
