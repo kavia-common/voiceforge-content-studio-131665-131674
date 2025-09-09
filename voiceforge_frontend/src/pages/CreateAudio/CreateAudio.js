@@ -1,5 +1,5 @@
-import React from 'react';
-import { useAppContext } from '../../context/AppContext';
+import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import ScriptUpload from '../../components/ScriptUpload/ScriptUpload';
 import { VoiceSelection } from '../../components/VoiceSelection';
@@ -13,13 +13,13 @@ import './CreateAudio.css';
  * Uses global context for state management
  */
 const CreateAudio = () => {
-  const { state, actions, utils } = useAppContext();
-  const { state: authState, actions: authActions } = useAuth();
+  const { currentScript, selectedVoice, audioSettings, actions } = useApp();
+  const { user } = useAuth();
   
-  const { currentScript, selectedVoice, currentStep, audioSettings } = state;
+  const [currentStep, setCurrentStep] = useState('script');
 
   const handleScriptChange = (scriptText) => {
-    actions.setScript(scriptText);
+    actions.setCurrentScript(scriptText);
   };
 
   const handleVoiceSelect = (voice) => {
@@ -27,19 +27,30 @@ const CreateAudio = () => {
   };
 
   const handleNextStep = (step) => {
-    actions.setCurrentStep(step);
+    setCurrentStep(step);
   };
 
   const handlePreviousStep = () => {
     if (currentStep === 'voice') {
-      actions.setCurrentStep('script');
+      setCurrentStep('script');
     } else if (currentStep === 'generate') {
-      actions.setCurrentStep('voice');
+      setCurrentStep('voice');
     }
   };
 
   const handleAudioSettingsChange = (newSettings) => {
-    actions.setAudioSettings(newSettings);
+    actions.updateAudioSettings(newSettings);
+  };
+
+  // Utility function for script statistics
+  const getScriptStats = () => {
+    if (!currentScript) return { words: 0, estimatedDuration: 0, characters: 0 };
+    
+    const words = currentScript.trim().split(/\s+/).length;
+    const characters = currentScript.length;
+    const estimatedDuration = Math.ceil(words / 150); // Estimate 150 words per minute
+    
+    return { words, characters, estimatedDuration };
   };
 
   const handlePreviewGeneration = (previewData) => {
@@ -58,9 +69,9 @@ const CreateAudio = () => {
     const creditsUsed = Math.ceil(currentScript.split(/\s+/).length / 10); // Example: 1 credit per 10 words
     const audioMinutes = Math.ceil(currentScript.split(/\s+/).length / 150); // Estimate duration
     
-    authActions.incrementUsage(creditsUsed, audioMinutes);
+    // Note: Usage tracking would be handled by the backend in a real implementation
     
-    // Add project to the list
+    // Add project to the list - would be handled by backend in real implementation
     const newProject = {
       id: generation.id || `project_${Date.now()}`,
       title: `Audio Project - ${new Date().toLocaleDateString()}`,
@@ -74,8 +85,6 @@ const CreateAudio = () => {
       creditsUsed
     };
     
-    actions.addProject(newProject);
-    
     actions.addNotification({
       type: 'success',
       title: 'Audio Generated!',
@@ -87,17 +96,16 @@ const CreateAudio = () => {
     // Check if user has enough credits
     const requiredCredits = Math.ceil(currentScript.split(/\s+/).length / 10);
     
-    if (!authState.utils?.canUseCredits(requiredCredits)) {
+    if (!user?.subscription?.usage) {
       actions.addNotification({
         type: 'error',
         title: 'Insufficient Credits',
-        message: `You need ${requiredCredits} credits but only have ${authState.utils?.getRemainingCredits()} remaining.`
+        message: `You need ${requiredCredits} credits but don't have enough remaining.`
       });
-      actions.showModal('subscription');
       return;
     }
     
-    actions.setCurrentStep('generate');
+    setCurrentStep('generate');
   };
 
   const steps = [
@@ -140,9 +148,9 @@ const CreateAudio = () => {
                   <h3>Script Ready!</h3>
                   <p>Your script is loaded and ready. Continue to select a voice.</p>
                   <div className="script-stats">
-                    <span>Words: {utils.getScriptStats().words}</span>
-                    <span>Est. Duration: {utils.getScriptStats().estimatedDuration} min</span>
-                    <span>Characters: {utils.getScriptStats().characters}</span>
+                    <span>Words: {getScriptStats().words}</span>
+                    <span>Est. Duration: {getScriptStats().estimatedDuration} min</span>
+                    <span>Characters: {getScriptStats().characters}</span>
                   </div>
                 </div>
                 <div className="action-buttons">
@@ -208,9 +216,9 @@ const CreateAudio = () => {
                 <h3>Script Summary</h3>
                 <div className="summary-card">
                   <div className="summary-details">
-                    <span>Words: {utils.getScriptStats().words}</span>
-                    <span>Est. Duration: {utils.getScriptStats().estimatedDuration} minutes</span>
-                    <span>Credits Required: {Math.ceil(utils.getScriptStats().words / 10)}</span>
+                    <span>Words: {getScriptStats().words}</span>
+                    <span>Est. Duration: {getScriptStats().estimatedDuration} minutes</span>
+                    <span>Credits Required: {Math.ceil(getScriptStats().words / 10)}</span>
                   </div>
                   <div className="summary-preview">
                     {currentScript.substring(0, 150)}

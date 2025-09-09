@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import VoiceCard from './VoiceCard';
 import VoiceFilters from './VoiceFilters';
@@ -14,8 +14,8 @@ import './VoiceSelection.css';
  * Uses global context for state management
  */
 const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = false }) => {
-  const { state, actions, utils } = useAppContext();
-  const { state: authState } = useAuth();
+  const { actions } = useApp();
+  const { user } = useAuth();
   
   const [voices, setVoices] = useState([]);
   const [filteredVoices, setFilteredVoices] = useState([]);
@@ -30,10 +30,11 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
     premium: false
   });
   
-  // Use global state for these values
-  const { favorites, uiState } = state;
-  const { viewMode, sortBy } = uiState;
-  const previewVoice = uiState.modals.voicePreview;
+  // Use local state for UI management
+  const [viewMode, setViewMode] = useState('grid');
+  const [sortBy, setSortBy] = useState('popular');
+  const [previewVoice, setPreviewVoice] = useState(null);
+  const [favorites, setFavorites] = useState(new Set());
 
   // Mock data for 200+ voices - in production this would come from API
   const generateMockVoices = useCallback(() => {
@@ -154,24 +155,32 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
   }, [onVoiceSelect]);
 
   const handlePreviewVoice = useCallback((voice) => {
-    actions.showModal('voicePreview', voice);
-  }, [actions]);
+    setPreviewVoice(voice);
+  }, []);
 
   const handleClosePreview = useCallback(() => {
-    actions.hideModal('voicePreview');
-  }, [actions]);
+    setPreviewVoice(null);
+  }, []);
 
   const handleToggleFavorite = useCallback((voiceId) => {
-    actions.toggleFavorite(voiceId);
+    const newFavorites = new Set(favorites);
+    const isFavorite = favorites.has(voiceId);
+    
+    if (isFavorite) {
+      newFavorites.delete(voiceId);
+    } else {
+      newFavorites.add(voiceId);
+    }
+    
+    setFavorites(newFavorites);
     
     // Show notification
-    const isFavorite = utils.isFavorite(voiceId);
     actions.addNotification({
       type: 'success',
       title: isFavorite ? 'Removed from Favorites' : 'Added to Favorites',
       message: isFavorite ? 'Voice removed from your favorites' : 'Voice added to your favorites'
     });
-  }, [actions, utils]);
+  }, [actions, favorites]);
 
   const handleSearchChange = useCallback((query) => {
     setSearchQuery(query);
@@ -214,7 +223,7 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
             <label>Sort by:</label>
             <select
               value={sortBy}
-              onChange={(e) => actions.setSortBy(e.target.value)}
+              onChange={(e) => setSortBy(e.target.value)}
               className="sort-select"
             >
               <option value="popular">Most Popular</option>
@@ -225,14 +234,14 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
           <div className="view-mode-toggle">
             <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => actions.setViewMode('grid')}
+              onClick={() => setViewMode('grid')}
               title="Grid view"
             >
               📱
             </button>
             <button
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => actions.setViewMode('list')}
+              onClick={() => setViewMode('list')}
               title="List view"
             >
               📋
@@ -285,10 +294,10 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
                   key={voice.id}
                   voice={voice}
                   isSelected={selectedVoice?.id === voice.id}
-                  isFavorite={utils.isFavorite(voice.id)}
+                  isFavorite={favorites.has(voice.id)}
                   onSelect={handleVoiceSelect}
                   onPreview={handlePreviewVoice}
-                  onToggleFavorite={handleToggleFavorite}
+                  onToggleFavorite={() => handleToggleFavorite(voice.id)}
                   viewMode={viewMode}
                 />
               ))}
@@ -302,8 +311,8 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
           voice={previewVoice}
           onClose={handleClosePreview}
           onSelect={handleVoiceSelect}
-          isFavorite={utils.isFavorite(previewVoice.id)}
-          onToggleFavorite={handleToggleFavorite}
+          isFavorite={favorites.has(previewVoice.id)}
+          onToggleFavorite={() => handleToggleFavorite(previewVoice.id)}
         />
       )}
     </div>

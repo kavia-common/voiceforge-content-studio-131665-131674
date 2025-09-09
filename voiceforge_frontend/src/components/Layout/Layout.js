@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { useAppContext } from '../../context/AppContext';
+import { useApp } from '../../context/AppContext';
 import './Layout.css';
 
 // PUBLIC_INTERFACE
@@ -10,8 +10,7 @@ import './Layout.css';
  * Provides the dashboard-style layout for the VoiceForge application
  */
 const Layout = () => {
-  const { state } = useAppContext();
-  const { sidebarCollapsed } = state.uiState;
+  const { sidebarCollapsed } = useApp();
 
   return (
     <div className={`layout ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
