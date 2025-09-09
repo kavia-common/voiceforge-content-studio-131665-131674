@@ -1,0 +1,4 @@
+{
+    "command": "npm run test",
+    "working_directory": "/home/kavia/workspace/code-generation/voiceforge-content-studio-131665-131674/voiceforge_frontend"
+}
