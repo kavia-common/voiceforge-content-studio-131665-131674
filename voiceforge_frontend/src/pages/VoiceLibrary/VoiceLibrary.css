@@ -1,0 +1,358 @@
+.voice-library {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+.voice-library-header {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.header-content h1 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.header-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.selected-voice-indicator {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--accent-color);
+  color: var(--primary-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.2);
+}
+
+.selected-voice-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.selected-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.selected-name {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.selected-meta {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.clear-selection-btn {
+  background: rgba(30, 41, 59, 0.2);
+  border: none;
+  color: var(--primary-color);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.clear-selection-btn:hover {
+  background: rgba(30, 41, 59, 0.3);
+}
+
+.voice-library-tabs {
+  display: flex;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+
+.library-tab {
+  flex: 1;
+  min-width: 200px;
+  padding: 1.5rem 2rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 3px solid transparent;
+}
+
+.library-tab:hover {
+  background: var(--bg-secondary);
+}
+
+.library-tab.active {
+  background: var(--bg-secondary);
+  border-bottom-color: var(--accent-color);
+}
+
+.tab-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.tab-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tab-description {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.library-tab.active .tab-label {
+  color: var(--accent-color);
+}
+
+.voice-library-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.voice-library-footer {
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  padding: 1.5rem 2rem;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.selection-summary {
+  flex: 1;
+}
+
+.summary-text {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.summary-text strong {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-secondary);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background: #10b981;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .voice-library-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .selected-voice-indicator {
+    align-self: center;
+  }
+
+  .voice-library-tabs {
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .library-tab {
+    scroll-snap-align: start;
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .voice-library-header {
+    padding: 1.5rem 1rem;
+  }
+
+  .header-content h1 {
+    font-size: 1.75rem;
+  }
+
+  .header-content p {
+    font-size: 1rem;
+  }
+
+  .selected-voice-indicator {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .voice-library-tabs {
+    flex-direction: column;
+  }
+
+  .library-tab {
+    flex: none;
+    min-width: auto;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    border-right: none;
+  }
+
+  .library-tab.active {
+    border-bottom-color: var(--border-color);
+    border-left: 3px solid var(--accent-color);
+  }
+
+  .tab-content {
+    align-items: stretch;
+  }
+
+  .voice-library-footer {
+    padding: 1rem;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .footer-actions {
+    flex-direction: column;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .voice-library-footer {
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .selected-voice-indicator {
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.4);
+}
+
+/* Animation for voice selection indicator */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.selected-voice-indicator {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Tab transition effects */
+.voice-library-content > * {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar styling for tabs on mobile */
+.voice-library-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.voice-library-tabs::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.voice-library-tabs::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.voice-library-tabs::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
+}

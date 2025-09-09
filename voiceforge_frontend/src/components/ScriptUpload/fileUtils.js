@@ -119,7 +119,7 @@ export const prepareTextForAudio = (text) => {
 // Extract voice control tags from text
 export const extractVoiceControls = (text) => {
   const controls = [];
-  const tagRegex = /\[(PAUSE|EMPHASIS|SPEED:[\w]+|VOLUME:[\w]+|PITCH:[\w]+)\]/g;
+  const tagRegex = /\[(PAUSE|EMPHASIS|SPEED:\w+|VOLUME:\w+|PITCH:\w+)]/g;
   
   let match;
   while ((match = tagRegex.exec(text)) !== null) {

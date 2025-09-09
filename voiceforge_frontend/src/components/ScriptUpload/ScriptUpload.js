@@ -4,10 +4,8 @@ import * as mammoth from 'mammoth';
 import { 
   getSupportedMimeTypes, 
   validateFile, 
-  formatFileSize, 
-  getFileTypeInfo,
+  formatFileSize,
   estimateReadingTime,
-  prepareTextForAudio,
   extractVoiceControls
 } from './fileUtils';
 import './ScriptUpload.css';
@@ -25,6 +23,38 @@ const ScriptUpload = ({ onScriptChange, onFileUpload }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [activeTab, setActiveTab] = useState('editor'); // 'editor' or 'upload'
   const textareaRef = useRef(null);
+
+  // Extract text from different file types
+  const extractTextFromFile = useCallback(async (file) => {
+    try {
+      let extractedText = '';
+      
+      if (file.type === 'text/plain') {
+        const text = await file.text();
+        extractedText = text;
+      } else if (file.type === 'application/pdf') {
+        // For PDF files, we'll use a simulated extraction for now
+        // In production, you'd use pdf-parse on the server side due to browser limitations
+        extractedText = `PDF file "${file.name}" uploaded successfully.\n\nNote: PDF text extraction will be processed on the server. Please review the extracted content before generating audio.\n\n[PDF content will appear here after processing...]`;
+      } else if (file.name.toLowerCase().endsWith('.docx')) {
+        // Extract text from DOCX files using mammoth
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        extractedText = result.value;
+      } else if (file.name.toLowerCase().endsWith('.doc')) {
+        // Legacy DOC files - show message about conversion
+        extractedText = `Legacy DOC file "${file.name}" detected.\n\nPlease save your document as .docx format for better text extraction, or copy and paste the content directly into the text editor.`;
+      }
+      
+      setScriptText(extractedText);
+      if (onScriptChange) {
+        onScriptChange(extractedText);
+      }
+    } catch (error) {
+      console.error('Error extracting text from file:', error);
+      setUploadError('Failed to extract text from file. Please try again or use the text editor.');
+    }
+  }, [onScriptChange]);
 
   // File validation using utility functions
   const validateFileInput = useCallback((file) => {
@@ -63,39 +93,7 @@ const ScriptUpload = ({ onScriptChange, onFileUpload }) => {
         onFileUpload(file);
       }
     }, 2500);
-  }, [onFileUpload]);
-
-  // Extract text from different file types
-  const extractTextFromFile = useCallback(async (file) => {
-    try {
-      let extractedText = '';
-      
-      if (file.type === 'text/plain') {
-        const text = await file.text();
-        extractedText = text;
-      } else if (file.type === 'application/pdf') {
-        // For PDF files, we'll use a simulated extraction for now
-        // In production, you'd use pdf-parse on the server side due to browser limitations
-        extractedText = `PDF file "${file.name}" uploaded successfully.\n\nNote: PDF text extraction will be processed on the server. Please review the extracted content before generating audio.\n\n[PDF content will appear here after processing...]`;
-      } else if (file.name.toLowerCase().endsWith('.docx')) {
-        // Extract text from DOCX files using mammoth
-        const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        extractedText = result.value;
-      } else if (file.name.toLowerCase().endsWith('.doc')) {
-        // Legacy DOC files - show message about conversion
-        extractedText = `Legacy DOC file "${file.name}" detected.\n\nPlease save your document as .docx format for better text extraction, or copy and paste the content directly into the text editor.`;
-      }
-      
-      setScriptText(extractedText);
-      if (onScriptChange) {
-        onScriptChange(extractedText);
-      }
-    } catch (error) {
-      console.error('Error extracting text from file:', error);
-      setUploadError('Failed to extract text from file. Please try again or use the text editor.');
-    }
-  }, [onScriptChange]);
+  }, [onFileUpload, extractTextFromFile]);
 
   // Handle file drop
   const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
