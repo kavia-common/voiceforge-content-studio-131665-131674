@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import VoiceCard from './VoiceCard';
 import VoiceFilters from './VoiceFilters';
 import VoiceSearch from './VoiceSearch';
@@ -9,8 +11,12 @@ import './VoiceSelection.css';
 /**
  * Advanced Voice Selection component with search, filtering, preview, and favorites
  * Supports browsing 200+ AI voices with advanced filtering options
+ * Uses global context for state management
  */
 const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = false }) => {
+  const { state, actions, utils } = useAppContext();
+  const { state: authState } = useAuth();
+  
   const [voices, setVoices] = useState([]);
   const [filteredVoices, setFilteredVoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,10 +29,11 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
     category: 'all',
     premium: false
   });
-  const [previewVoice, setPreviewVoice] = useState(null);
-  const [favorites, setFavorites] = useState(new Set());
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-  const [sortBy, setSortBy] = useState('popular'); // 'popular', 'name', 'newest'
+  
+  // Use global state for these values
+  const { favorites, uiState } = state;
+  const { viewMode, sortBy } = uiState;
+  const previewVoice = uiState.modals.voicePreview;
 
   // Mock data for 200+ voices - in production this would come from API
   const generateMockVoices = useCallback(() => {
@@ -85,14 +92,6 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
       setLoading(false);
     }, 1000);
   }, [generateMockVoices]);
-
-  // Load favorites from localStorage
-  useEffect(() => {
-    const savedFavorites = localStorage.getItem('voiceforge-favorites');
-    if (savedFavorites) {
-      setFavorites(new Set(JSON.parse(savedFavorites)));
-    }
-  }, []);
 
   // Filter and search voices
   useEffect(() => {
@@ -155,23 +154,24 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
   }, [onVoiceSelect]);
 
   const handlePreviewVoice = useCallback((voice) => {
-    setPreviewVoice(voice);
-  }, []);
+    actions.showModal('voicePreview', voice);
+  }, [actions]);
 
   const handleClosePreview = useCallback(() => {
-    setPreviewVoice(null);
-  }, []);
+    actions.hideModal('voicePreview');
+  }, [actions]);
 
   const handleToggleFavorite = useCallback((voiceId) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(voiceId)) {
-      newFavorites.delete(voiceId);
-    } else {
-      newFavorites.add(voiceId);
-    }
-    setFavorites(newFavorites);
-    localStorage.setItem('voiceforge-favorites', JSON.stringify([...newFavorites]));
-  }, [favorites]);
+    actions.toggleFavorite(voiceId);
+    
+    // Show notification
+    const isFavorite = utils.isFavorite(voiceId);
+    actions.addNotification({
+      type: 'success',
+      title: isFavorite ? 'Removed from Favorites' : 'Added to Favorites',
+      message: isFavorite ? 'Voice removed from your favorites' : 'Voice added to your favorites'
+    });
+  }, [actions, utils]);
 
   const handleSearchChange = useCallback((query) => {
     setSearchQuery(query);
@@ -214,7 +214,7 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
             <label>Sort by:</label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => actions.setSortBy(e.target.value)}
               className="sort-select"
             >
               <option value="popular">Most Popular</option>
@@ -225,14 +225,14 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
           <div className="view-mode-toggle">
             <button
               className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => setViewMode('grid')}
+              onClick={() => actions.setViewMode('grid')}
               title="Grid view"
             >
               📱
             </button>
             <button
               className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
+              onClick={() => actions.setViewMode('list')}
               title="List view"
             >
               📋
@@ -285,7 +285,7 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
                   key={voice.id}
                   voice={voice}
                   isSelected={selectedVoice?.id === voice.id}
-                  isFavorite={favorites.has(voice.id)}
+                  isFavorite={utils.isFavorite(voice.id)}
                   onSelect={handleVoiceSelect}
                   onPreview={handlePreviewVoice}
                   onToggleFavorite={handleToggleFavorite}
@@ -302,7 +302,7 @@ const VoiceSelection = ({ onVoiceSelect, selectedVoice, showFavoritesOnly = fals
           voice={previewVoice}
           onClose={handleClosePreview}
           onSelect={handleVoiceSelect}
-          isFavorite={favorites.has(previewVoice.id)}
+          isFavorite={utils.isFavorite(previewVoice.id)}
           onToggleFavorite={handleToggleFavorite}
         />
       )}

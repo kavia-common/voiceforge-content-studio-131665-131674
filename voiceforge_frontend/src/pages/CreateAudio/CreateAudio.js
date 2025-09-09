@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useAppContext } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
 import ScriptUpload from '../../components/ScriptUpload/ScriptUpload';
 import { VoiceSelection } from '../../components/VoiceSelection';
 import AudioControls from '../../components/AudioControls';
@@ -8,64 +10,94 @@ import './CreateAudio.css';
 // PUBLIC_INTERFACE
 /**
  * Create Audio page for script upload, voice selection, and audio generation
+ * Uses global context for state management
  */
 const CreateAudio = () => {
-  const [currentScript, setCurrentScript] = useState('');
-  const [selectedVoice, setSelectedVoice] = useState(null);
-  const [currentStep, setCurrentStep] = useState('script'); // 'script', 'voice', 'generate'
-  const [audioSettings, setAudioSettings] = useState({
-    speed: 1.0,
-    pitch: 1.0,
-    volume: 1.0,
-    emotion: 'neutral',
-    emotionIntensity: 0.5,
-    pace: 'normal',
-    backgroundMusic: null,
-    musicVolume: 0.3,
-    voiceEffects: {
-      addPauses: true,
-      breathingSounds: false,
-      emphasis: false,
-      whisper: false
-    }
-  });
+  const { state, actions, utils } = useAppContext();
+  const { state: authState, actions: authActions } = useAuth();
+  
+  const { currentScript, selectedVoice, currentStep, audioSettings } = state;
 
   const handleScriptChange = (scriptText) => {
-    setCurrentScript(scriptText);
+    actions.setScript(scriptText);
   };
 
   const handleVoiceSelect = (voice) => {
-    setSelectedVoice(voice);
+    actions.setSelectedVoice(voice);
   };
 
   const handleNextStep = (step) => {
-    setCurrentStep(step);
+    actions.setCurrentStep(step);
   };
 
   const handlePreviousStep = () => {
     if (currentStep === 'voice') {
-      setCurrentStep('script');
+      actions.setCurrentStep('script');
     } else if (currentStep === 'generate') {
-      setCurrentStep('voice');
+      actions.setCurrentStep('voice');
     }
   };
 
   const handleAudioSettingsChange = (newSettings) => {
-    setAudioSettings(newSettings);
+    actions.setAudioSettings(newSettings);
   };
 
   const handlePreviewGeneration = (previewData) => {
     console.log('Preview generated:', previewData);
+    actions.addNotification({
+      type: 'success',
+      title: 'Preview Generated',
+      message: 'Audio preview is ready to play'
+    });
   };
 
   const handleGenerationComplete = (generation) => {
     console.log('Generation completed:', generation);
-    alert(`Audio generation completed! File: ${generation.id}`);
+    
+    // Update usage statistics
+    const creditsUsed = Math.ceil(currentScript.split(/\s+/).length / 10); // Example: 1 credit per 10 words
+    const audioMinutes = Math.ceil(currentScript.split(/\s+/).length / 150); // Estimate duration
+    
+    authActions.incrementUsage(creditsUsed, audioMinutes);
+    
+    // Add project to the list
+    const newProject = {
+      id: generation.id || `project_${Date.now()}`,
+      title: `Audio Project - ${new Date().toLocaleDateString()}`,
+      script: currentScript,
+      voice: selectedVoice,
+      settings: audioSettings,
+      status: 'completed',
+      createdAt: new Date().toISOString(),
+      audioUrl: generation.audioUrl,
+      duration: audioMinutes,
+      creditsUsed
+    };
+    
+    actions.addProject(newProject);
+    
+    actions.addNotification({
+      type: 'success',
+      title: 'Audio Generated!',
+      message: `Your audio project has been completed successfully. Used ${creditsUsed} credits.`
+    });
   };
 
   const handleGenerateAudio = () => {
-    // This will be handled by the AudioGeneration component
-    setCurrentStep('generate');
+    // Check if user has enough credits
+    const requiredCredits = Math.ceil(currentScript.split(/\s+/).length / 10);
+    
+    if (!authState.utils?.canUseCredits(requiredCredits)) {
+      actions.addNotification({
+        type: 'error',
+        title: 'Insufficient Credits',
+        message: `You need ${requiredCredits} credits but only have ${authState.utils?.getRemainingCredits()} remaining.`
+      });
+      actions.showModal('subscription');
+      return;
+    }
+    
+    actions.setCurrentStep('generate');
   };
 
   const steps = [
@@ -108,8 +140,9 @@ const CreateAudio = () => {
                   <h3>Script Ready!</h3>
                   <p>Your script is loaded and ready. Continue to select a voice.</p>
                   <div className="script-stats">
-                    <span>Words: {currentScript.split(/\s+/).filter(word => word.length > 0).length}</span>
-                    <span>Est. Duration: {Math.ceil(currentScript.split(/\s+/).length / 150)} min</span>
+                    <span>Words: {utils.getScriptStats().words}</span>
+                    <span>Est. Duration: {utils.getScriptStats().estimatedDuration} min</span>
+                    <span>Characters: {utils.getScriptStats().characters}</span>
                   </div>
                 </div>
                 <div className="action-buttons">
@@ -175,8 +208,9 @@ const CreateAudio = () => {
                 <h3>Script Summary</h3>
                 <div className="summary-card">
                   <div className="summary-details">
-                    <span>Words: {currentScript.split(/\s+/).filter(word => word.length > 0).length}</span>
-                    <span>Est. Duration: {Math.ceil(currentScript.split(/\s+/).length / 150)} minutes</span>
+                    <span>Words: {utils.getScriptStats().words}</span>
+                    <span>Est. Duration: {utils.getScriptStats().estimatedDuration} minutes</span>
+                    <span>Credits Required: {Math.ceil(utils.getScriptStats().words / 10)}</span>
                   </div>
                   <div className="summary-preview">
                     {currentScript.substring(0, 150)}
